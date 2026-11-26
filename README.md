@@ -178,7 +178,6 @@ POSTGRES_PASSWORD=sem
 POSTGRES_DB=sem
 HOST_UID=1000
 HOST_GID=1000
-```
 
 $ docker compose --profile batch build
  ✔ Image sem-classifier:1.0  Built
@@ -188,22 +187,10 @@ $ docker images | grep -E "sem-classifier|sem-pipeline"
 sem-classifier   1.0   xxxxxxxxxxxx   x seconds ago   ~2GB
 sem-pipeline     1.0   xxxxxxxxxxxx   x seconds ago   ~400MB
 ```
+- `sem-classifier`: Python, CPU torch, BentoML, `service.py` **and the model**, downloaded once during the build, so it never needs the internet again.
+- `sem-pipeline`: Python, `semmeta`, the pipeline code, the database client and the example images.
 
-- `sem-classifier` holds Python, CPU torch, BentoML, `service.py` **and the model**, downloaded once during the build. It never needs the internet again, so its pods can start anywhere, even on a cluster without internet access.
-- `sem-pipeline` holds Python, `semmeta`, the pipeline code, the database client and the example images.
-
-Only these two images contain our code, so only they are built. The database and Adminer use official ready-made images (`postgres:16-alpine` and `adminer`): you don't build them, `docker compose up -d` downloads them automatically in step 1, the first time you start the services. The `upload` service of step 7 reuses the pipeline image.
-
-`--profile batch` includes the pipeline image in the build.
-
-**`.env`: settings and secrets stay out of the code.** `.env` holds the database user, password and name, and your user and group ids (`HOST_UID`, `HOST_GID`: the files written by the pipeline belong to you, not to `root`). `compose.yaml` reads every value from it: no password is written in any file of the repository.
-
-| File | In git? | Holds |
-|---|---|---|
-| `.env.example` | **yes** | the **names** of the settings, with example values: what the project needs |
-| `.env` | **never** (listed in `.gitignore`) | **your** values, including the password |
-
-A password committed to git stays in its history forever, even after you delete it, and anyone who can read the repository can read it. Here `sem` is fine: a database that lives a few hours on your laptop. In a real deployment you would set a strong password in `.env`, and the code wouldn't change at all. If `.env` is missing, Compose stops with `required variable POSTGRES_PASSWORD is missing a value`.
+Only these two images contain our code. PostgreSQL and Adminer use official images, which `docker compose up -d` downloads in step 1; the `upload` service of step 7 reuses the pipeline image. `--profile batch` includes the pipeline image in the build.
 
 ### 0.3 Install kind and kubectl
 
