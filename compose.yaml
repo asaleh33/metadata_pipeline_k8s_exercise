@@ -1,0 +1,80 @@
+# SEM pipeline: database, its web view, the classifier, and the pipeline (batch, or upload API).
+# The database settings (user, password, name) come from .env: copy .env.example to .env first.
+#   docker compose --profile batch build      build the two images
+#   docker compose up -d                      start db, adminer, classifier
+#   docker compose run --rm pipeline          process ./imgs once
+#   docker compose --profile api up -d upload the upload service on port 3001
+name: sem-pipeline
+
+x-pipeline-env: &pipeline-env
+  DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+  CLASSIFIER_URL: http://classifier:3000
+
+services:
+  db:                                   # PostgreSQL: the selected metadata of every image
+    image: postgres:16-alpine
+    environment:                        # from .env: no password written in this file
+      POSTGRES_USER: ${POSTGRES_USER:?set POSTGRES_USER in .env (copy .env.example)}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env (copy .env.example)}
+      POSTGRES_DB: ${POSTGRES_DB:?set POSTGRES_DB in .env (copy .env.example)}
+    ports:
+      - "5433:5432"                     # for ask.py and psql on your laptop (5433: avoids a local PostgreSQL)
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      retries: 10
+
+  adminer:                              # the database in the browser: http://localhost:8081
+    image: adminer
+    environment:
+      ADMINER_DEFAULT_SERVER: db
+    ports:
+      - "8081:8080"
+    depends_on: [db]
+
+  classifier:                           # BentoML: image -> category
+    build: ./classifier
+    image: sem-classifier:1.0
+    ports:
+      - "3000:3000"
+    healthcheck:                        # ready = model loaded (the /readyz endpoint)
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:3000/readyz')"]
+      interval: 10s
+      start_period: 120s
+      retries: 10
+
+  pipeline:                             # runs once over ./imgs, then stops
+    build:
+      context: .
+      dockerfile: pipeline/Dockerfile
+    image: sem-pipeline:1.0
+    profiles: ["batch"]
+    environment: *pipeline-env
+    user: "${HOST_UID:-1000}:${HOST_GID:-1000}"   # output files belong to you, not to root
+    volumes:
+      - ./imgs:/data/imgs:ro
+      - ./output:/data/output
+      - ./variables.json:/app/variables.json:ro
+    depends_on:
+      db: {condition: service_healthy}
+      classifier: {condition: service_healthy}
+
+  upload:                               # the pipeline as a REST API: upload one image, get it processed (http://localhost:3001)
+    image: sem-pipeline:1.0
+    profiles: ["api"]
+    command: ["bentoml", "serve", "api:SemPipeline", "--port", "3001"]
+    environment: *pipeline-env
+    user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./output:/data/output
+      - ./variables.json:/app/variables.json:ro
+    depends_on:
+      db: {condition: service_healthy}
+      classifier: {condition: service_healthy}
+
+volumes:
+  pgdata:

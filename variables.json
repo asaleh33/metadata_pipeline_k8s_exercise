@@ -1,0 +1,11 @@
+{
+  "_comment": "Metadata keys shown in the table under each image and stored in table selected_metadata. Add or remove keys, then run the pipeline again. Find key names with: python ask.py --keys <part of a name>",
+  "variables": [
+    "AP_WD",
+    "AP_BEAM_TIME",
+    "AP_IMAGE_PIXEL_SIZE",
+    "AP_HOLDER_HEIGHT",
+    "AP_BEAM_CURRENT",
+    "AP_HOLDER_DIAMETER"
+  ]
+}

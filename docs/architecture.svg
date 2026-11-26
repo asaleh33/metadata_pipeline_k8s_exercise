@@ -1,0 +1,124 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 600" width="1040" height="600" font-family="Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#444"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="1040" height="600" rx="12" fill="#ffffff"/>
+
+  <!-- column headers -->
+  <g font-size="13" font-weight="bold" fill="#666" letter-spacing="2" text-anchor="middle">
+    <text x="120" y="40">INPUT</text>
+    <text x="470" y="40">PROCESSING</text>
+    <text x="875" y="40">OUTPUT</text>
+  </g>
+
+  <!-- INPUT: images -->
+  <rect x="20" y="95" width="200" height="140" rx="10" fill="#f1f3f6" stroke="#7b8794" stroke-width="1.5"/>
+  <text x="120" y="122" font-size="15" font-weight="bold" text-anchor="middle" fill="#222">SEM images</text>
+  <text x="120" y="142" font-size="12" text-anchor="middle" fill="#555">imgs/  (TIFF, any subfolder)</text>
+  <g fill="#ffffff" stroke="#7b8794" stroke-width="1.2">
+    <path d="M62 160 h30 l10 10 v45 h-40 z"/><path d="M110 160 h30 l10 10 v45 h-40 z"/><path d="M158 160 h30 l10 10 v45 h-40 z"/>
+  </g>
+  <g font-size="10" fill="#555" text-anchor="middle"><text x="82" y="200">.tif</text><text x="130" y="200">.tif</text><text x="178" y="200">.tif</text></g>
+
+  <!-- INPUT: variables -->
+  <rect x="20" y="305" width="200" height="88" rx="10" fill="#ffffff" stroke="#7b8794" stroke-width="1.5" stroke-dasharray="5 4"/>
+  <text x="120" y="331" font-size="14" font-weight="bold" text-anchor="middle" fill="#222">variables.json</text>
+  <text x="120" y="351" font-size="12" text-anchor="middle" fill="#555">which keys to show</text>
+  <text x="120" y="367" font-size="12" text-anchor="middle" fill="#555">in the table and store</text>
+  <text x="120" y="383" font-size="11" text-anchor="middle" fill="#888">(optional)</text>
+
+  <!-- PIPELINE container -->
+  <rect x="260" y="60" width="420" height="385" rx="12" fill="#eef4ff" stroke="#3b6fd8" stroke-width="2"/>
+  <text x="280" y="86" font-size="15" font-weight="bold" fill="#1d3f8f">pipeline container</text>
+  <text x="660" y="86" font-size="12" text-anchor="end" fill="#1d3f8f">semmeta + process.py</text>
+  <g font-size="14">
+    <g transform="translate(0,100)">
+      <rect x="280" y="0" width="380" height="46" rx="8" fill="#fff" stroke="#9db6ea"/>
+      <circle cx="302" cy="23" r="12" fill="#3b6fd8"/><text x="302" y="28" fill="#fff" font-weight="bold" text-anchor="middle">1</text>
+      <text x="324" y="28" font-weight="bold" fill="#222">Extract metadata</text>
+      <text x="648" y="28" font-size="12" text-anchor="end" fill="#666">_raw.json</text>
+    </g>
+    <g transform="translate(0,156)">
+      <rect x="280" y="0" width="380" height="46" rx="8" fill="#fff" stroke="#9db6ea"/>
+      <circle cx="302" cy="23" r="12" fill="#3b6fd8"/><text x="302" y="28" fill="#fff" font-weight="bold" text-anchor="middle">2</text>
+      <text x="324" y="28" font-weight="bold" fill="#222">Clean values</text>
+      <text x="648" y="28" font-size="12" text-anchor="end" fill="#666">_cleaned.json</text>
+    </g>
+    <g transform="translate(0,212)">
+      <rect x="280" y="0" width="380" height="46" rx="8" fill="#fff" stroke="#e08a1e" stroke-width="1.5"/>
+      <circle cx="302" cy="23" r="12" fill="#e08a1e"/><text x="302" y="28" fill="#fff" font-weight="bold" text-anchor="middle">3</text>
+      <text x="324" y="28" font-weight="bold" fill="#222">Classify the image</text>
+      <text x="648" y="28" font-size="12" text-anchor="end" fill="#666">category, confidence</text>
+    </g>
+    <g transform="translate(0,268)">
+      <rect x="280" y="0" width="380" height="46" rx="8" fill="#fff" stroke="#9db6ea"/>
+      <circle cx="302" cy="23" r="12" fill="#3b6fd8"/><text x="302" y="28" fill="#fff" font-weight="bold" text-anchor="middle">4</text>
+      <text x="324" y="28" font-weight="bold" fill="#222">Enrich: metadata + category</text>
+      <text x="648" y="28" font-size="12" text-anchor="end" fill="#666">_enriched.json</text>
+    </g>
+    <g transform="translate(0,324)">
+      <rect x="280" y="0" width="380" height="46" rx="8" fill="#fff" stroke="#9db6ea"/>
+      <circle cx="302" cy="23" r="12" fill="#3b6fd8"/><text x="302" y="28" fill="#fff" font-weight="bold" text-anchor="middle">5</text>
+      <text x="324" y="28" font-weight="bold" fill="#222">Draw image + table</text>
+      <text x="648" y="28" font-size="12" text-anchor="end" fill="#666">.png, terminal table</text>
+    </g>
+    <g transform="translate(0,380)">
+      <rect x="280" y="0" width="380" height="46" rx="8" fill="#fff" stroke="#9db6ea"/>
+      <circle cx="302" cy="23" r="12" fill="#3b6fd8"/><text x="302" y="28" fill="#fff" font-weight="bold" text-anchor="middle">6</text>
+      <text x="324" y="28" font-weight="bold" fill="#222">Store in the database</text>
+      <text x="648" y="28" font-size="12" text-anchor="end" fill="#666">rows</text>
+    </g>
+  </g>
+
+  <!-- CLASSIFIER container -->
+  <rect x="260" y="485" width="420" height="80" rx="12" fill="#fff4e6" stroke="#e08a1e" stroke-width="2"/>
+  <text x="280" y="512" font-size="15" font-weight="bold" fill="#8a4b00">classifier container</text>
+  <text x="660" y="512" font-size="12" text-anchor="end" fill="#8a4b00">BentoML</text>
+  <text x="280" y="534" font-size="12" fill="#555">ViT model inside the image</text>
+  <text x="280" y="552" font-size="12" fill="#555">POST /classify → {category, confidence, model}</text>
+
+  <!-- OUTPUT: files -->
+  <rect x="730" y="95" width="290" height="190" rx="10" fill="#ecf8ef" stroke="#2e9e5b" stroke-width="2"/>
+  <text x="750" y="122" font-size="15" font-weight="bold" fill="#1b6b3c">output/</text>
+  <text x="1000" y="122" font-size="12" text-anchor="end" fill="#1b6b3c">one set per image</text>
+  <g font-size="13">
+    <rect x="745" y="135" width="260" height="30" rx="6" fill="#ffffff" stroke="#2e9e5b"/>
+    <text x="757" y="155" font-weight="bold" fill="#222">&lt;name&gt;_enriched.json</text>
+    <text x="995" y="155" font-size="11" text-anchor="end" fill="#2e9e5b">result</text>
+    <rect x="745" y="172" width="260" height="30" rx="6" fill="#ffffff" stroke="#2e9e5b"/>
+    <text x="757" y="192" font-weight="bold" fill="#222">&lt;name&gt;.png</text>
+    <text x="995" y="192" font-size="11" text-anchor="end" fill="#2e9e5b">image + table</text>
+    <text x="757" y="226" font-size="12" fill="#666">&lt;name&gt;_raw.json, &lt;name&gt;_cleaned.json</text>
+    <text x="757" y="244" font-size="12" fill="#666">processing_report.txt</text>
+    <text x="757" y="268" font-size="11" fill="#888">intermediate files, kept for traceability</text>
+  </g>
+
+  <!-- OUTPUT: database -->
+  <rect x="730" y="320" width="290" height="125" rx="10" fill="#f3eefc" stroke="#7a52c7" stroke-width="2"/>
+  <text x="750" y="347" font-size="15" font-weight="bold" fill="#4b2a91">PostgreSQL container</text>
+  <text x="750" y="372" font-size="13" font-weight="bold" fill="#222">images</text>
+  <text x="750" y="389" font-size="12" fill="#555">one row per image + all its metadata</text>
+  <text x="750" y="414" font-size="13" font-weight="bold" fill="#222">selected_metadata</text>
+  <text x="750" y="431" font-size="12" fill="#555">the chosen keys, as number + unit</text>
+
+  <!-- OUTPUT: you -->
+  <rect x="730" y="485" width="290" height="80" rx="10" fill="#ffffff" stroke="#7b8794" stroke-width="1.5"/>
+  <text x="750" y="512" font-size="15" font-weight="bold" fill="#222">You ask</text>
+  <text x="750" y="534" font-size="12" fill="#555">SQL queries, Adminer (browser),</text>
+  <text x="750" y="552" font-size="12" fill="#555">ask.py: any key, for every image</text>
+
+  <!-- arrows -->
+  <g stroke="#444" stroke-width="1.8" fill="none" marker-end="url(#a)">
+    <path d="M220 165 H242 V123 H278"/>
+    <path d="M220 349 H278"/>
+    <path d="M470 447 V483" stroke="#e08a1e" marker-start="url(#a)"/>
+    <path d="M680 175 H728"/>
+    <path d="M660 403 H690 V383 H728"/>
+    <path d="M875 485 V447" marker-start="url(#a)"/>
+  </g>
+  <text x="482" y="470" font-size="11" fill="#8a4b00">step 3: image → category</text>
+
+  <text x="520" y="590" font-size="11" fill="#777" text-anchor="middle">The three containers are started together: by Docker Compose on one computer, or by Kubernetes on a cluster.</text>
+</svg>

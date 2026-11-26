@@ -1,0 +1,80 @@
+# The SEM pipeline on Kubernetes (kind). One file, five objects:
+#   db          Deployment + Service   PostgreSQL
+#   classifier  Deployment + Service   BentoML, ready when its model is loaded
+#   pipeline    Job                    processes the images once, then stops
+# Images sem-classifier:1.0 and sem-pipeline:1.0 are loaded into kind (imagePullPolicy: Never).
+# The database settings come from the Secret db-credentials (step 6.3):
+#   kubectl create secret generic db-credentials --from-env-file=.env
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: db}
+spec:
+  selector: {matchLabels: {app: db}}
+  template:
+    metadata: {labels: {app: db}}
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+          env:                            # from the Secret: no password written in this file
+            - {name: POSTGRES_USER, valueFrom: {secretKeyRef: {name: db-credentials, key: POSTGRES_USER}}}
+            - {name: POSTGRES_PASSWORD, valueFrom: {secretKeyRef: {name: db-credentials, key: POSTGRES_PASSWORD}}}
+            - {name: POSTGRES_DB, valueFrom: {secretKeyRef: {name: db-credentials, key: POSTGRES_DB}}}
+          ports: [{containerPort: 5432}]
+          readinessProbe:
+            exec: {command: ["sh", "-c", "pg_isready -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\""]}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: db}
+spec:
+  selector: {app: db}
+  ports: [{port: 5432}]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: classifier}
+spec:
+  replicas: 1
+  selector: {matchLabels: {app: classifier}}
+  template:
+    metadata: {labels: {app: classifier}}
+    spec:
+      containers:
+        - name: classifier
+          image: sem-classifier:1.0
+          imagePullPolicy: Never
+          ports: [{containerPort: 3000}]
+          readinessProbe:                 # no traffic before the model is loaded
+            httpGet: {path: /readyz, port: 3000}
+            periodSeconds: 5
+          livenessProbe:                  # restart the container if it hangs
+            httpGet: {path: /livez, port: 3000}
+            initialDelaySeconds: 60
+---
+apiVersion: v1
+kind: Service
+metadata: {name: classifier}
+spec:
+  selector: {app: classifier}
+  ports: [{port: 3000}]
+---
+apiVersion: batch/v1
+kind: Job
+metadata: {name: pipeline}
+spec:
+  backoffLimit: 2                         # if a pod fails, try again (at most 2 more times)
+  template:
+    metadata: {labels: {app: pipeline}}
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: pipeline
+          image: sem-pipeline:1.0
+          imagePullPolicy: Never
+          env:                            # $(VAR) uses the variables defined just above
+            - {name: POSTGRES_USER, valueFrom: {secretKeyRef: {name: db-credentials, key: POSTGRES_USER}}}
+            - {name: POSTGRES_PASSWORD, valueFrom: {secretKeyRef: {name: db-credentials, key: POSTGRES_PASSWORD}}}
+            - {name: POSTGRES_DB, valueFrom: {secretKeyRef: {name: db-credentials, key: POSTGRES_DB}}}
+            - {name: DATABASE_URL, value: "postgresql://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@db:5432/$(POSTGRES_DB)"}
+            - {name: CLASSIFIER_URL, value: "http://classifier:3000"}
