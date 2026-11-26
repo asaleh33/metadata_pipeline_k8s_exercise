@@ -99,9 +99,8 @@ Docker version 2x.x.x, build xxxxxxx
 ## The folder
 
 ```text
-metadata-pipeline/
+metadata_pipeline_k8s_exercise/
 ├── README.md
-├── .env.example            the database settings: copy it to .env (step 0.2)
 ├── .gitignore              what git never commits: .env, output/, ...
 ├── compose.yaml            the containers on one computer (Docker Compose)
 ├── k8s.yaml                the same on Kubernetes
@@ -124,11 +123,11 @@ metadata-pipeline/
 │   ├── requirements.txt
 │   └── Dockerfile
 ├── docs/                   figures of this guide
-└── output/                 created by the pipeline
+├── .env                    database settings and your ids (never committed)
+└── output/                 created in step 0.2, filled by the pipeline
 ```
 
-All commands run from `metadata-pipeline`.
-
+All commands run from `metadata_pipeline_k8s_exercise`.
 ---
 
 ## Step 0: set up
