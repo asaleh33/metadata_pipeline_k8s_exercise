@@ -135,16 +135,15 @@ All commands run from `metadata-pipeline`.
 
 The first build downloads about 1.5 GB (Python, torch, the AI model).
 
-### 0.1 A Python environment for the exercise: sem-auto
+### 0.1 Get the code, and a Python environment: sem-auto
 
-The pipeline itself runs in containers, but a few tools run on your laptop: the tests of `semmeta`, and `ask.py`, which queries the database. They get their own environment, `sem-auto`, so nothing else on your laptop changes, even if you already have these packages.
+The pipeline itself runs in containers, but a few tools run on your laptop: the tests of `semmeta`, and `ask.py`, which queries the database. They get their own environment, `sem-auto`, so nothing else on your laptop changes, even if you already have these packages. Any Python from 3.10 on works (`python3 --version`).
 
 ```console
-$ git clone <repository URL> metadata-pipeline
-Cloning into 'metadata-pipeline'...
+$ git clone https://github.com/asaleh33/metadata_pipeline_k8s_exercise.git
+Cloning into 'metadata_pipeline_k8s_exercise'...
 ...
-$ cd metadata-pipeline
-
+$ cd metadata_pipeline_k8s_exercise
 $ python3.12 -m venv ~/venvs/sem-auto --prompt sem-auto
 $ source ~/venvs/sem-auto/bin/activate
 $ python -m pip install --upgrade pip
@@ -166,15 +165,20 @@ The first build takes about 10–15 minutes, mostly to download torch and the mo
 
 ```console
 $ mkdir -p output
-$ cp .env.example .env
-$ echo "HOST_UID=$(id -u)" >> .env
-$ echo "HOST_GID=$(id -g)" >> .env
-$ grep -v "^#" .env                 # the file without its comment lines
+$ cat > .env <<EOF
+POSTGRES_USER=sem
+POSTGRES_PASSWORD=sem
+POSTGRES_DB=sem
+HOST_UID=$(id -u)
+HOST_GID=$(id -g)
+EOF
+$ cat .env
 POSTGRES_USER=sem
 POSTGRES_PASSWORD=sem
 POSTGRES_DB=sem
 HOST_UID=1000
 HOST_GID=1000
+```
 
 $ docker compose --profile batch build
  ✔ Image sem-classifier:1.0  Built
